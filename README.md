@@ -27,7 +27,7 @@ The datasets are selected on arguments '--test_set'. Five datasets in ETH/UCY ar
 
 ### Example
 
-This command is to train model for ETH-hotel
+This command is to train model for ETH-univ
 ```
 python train.py --test_set 0 --num_epochs 1000 --x_encoder_layers 3 --eta_min 1e-5  --batch_size 32\
   --learning_rate 5e-4  --randomRotate True --final_mode 20 --neighbor_thred 10\
@@ -35,7 +35,7 @@ python train.py --test_set 0 --num_epochs 1000 --x_encoder_layers 3 --eta_min 1e
 ```
 
 ## Test
-This command is to test model for ETH-hotel, just add --phase test --load_model 1000 to the end of this training command.
+This command is to test model for ETH-univ, just add --phase test --load_model 1000 to the end of this training command.
 ```
 python train.py --test_set 0 --num_epochs 1000 --x_encoder_layers 3 --eta_min 1e-5  --batch_size 32\
   --learning_rate 5e-4  --randomRotate True --final_mode 20 --neighbor_thred 10\
