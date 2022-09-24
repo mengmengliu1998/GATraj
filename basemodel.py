@@ -33,128 +33,6 @@ def initialize_weights(modules):
         else:
             print(m,"************")
 
-class Conv1d(nn.Module):
-    def __init__(self, n_in, n_out, kernel_size=3, stride=1, norm='GN', ng=32, act=True):
-        super(Conv1d, self).__init__()
-        assert(norm in ['GN', 'BN', 'SyncBN'])
-
-        self.conv = nn.Conv1d(n_in, n_out, kernel_size=kernel_size, padding=(int(kernel_size) - 1) // 2, stride=stride, bias=False)
-
-        if norm == 'GN':
-            self.norm = nn.GroupNorm(gcd(ng, n_out), n_out)
-        elif norm == 'BN':
-            self.norm = nn.BatchNorm1d(n_out)
-        else:
-            exit('SyncBN has not been added!')
-
-        self.relu = nn.ReLU(inplace=True)
-        self.act = act
-
-    def forward(self, x):
-        out = self.conv(x)
-        out = self.norm(out)
-        if self.act:
-            out = self.relu(out)
-        return out        
-
-class GlobalGraph(nn.Module):
-    r"""
-    Global graph
-    It's actually a self-attention.
-    """
-
-    def __init__(self, hidden_size, attention_head_size=None, num_attention_heads=4):
-        super(GlobalGraph, self).__init__()
-        self.num_attention_heads = num_attention_heads
-        self.attention_head_size = hidden_size // num_attention_heads if attention_head_size is None else attention_head_size
-        self.all_head_size = self.num_attention_heads * self.attention_head_size
-
-        self.num_qkv = 1
-
-        self.query = nn.Linear(hidden_size, self.all_head_size * self.num_qkv)
-        self.key = nn.Linear(hidden_size, self.all_head_size * self.num_qkv)
-        self.value = nn.Linear(hidden_size, self.all_head_size * self.num_qkv)
-
-    def get_extended_attention_mask(self, attention_mask):
-        """
-        1 in attention_mask stands for doing attention, 0 for not doing attention.
-        After this function, 1 turns to 0, 0 turns to -10000.0
-        Because the -10000.0 will be fed into softmax and -10000.0 can be thought as 0 in softmax.
-        """
-        extended_attention_mask = attention_mask.unsqueeze(1)
-        extended_attention_mask = (1.0 - extended_attention_mask) * -10000.0
-        return extended_attention_mask
-
-    def transpose_for_scores(self, x):
-        sz = x.size()[:-1] + (self.num_attention_heads,
-                              self.attention_head_size)
-        # (batch, max_vector_num, head, head_size)
-        x = x.view(*sz)
-        # print("x",x.shape)
-        # (batch, head, max_vector_num, head_size)
-        return x.permute(0, 2, 1, 3)
-
-    def forward(self, hidden_states, attention_mask=None, mapping=None, return_scores=False):
-        mixed_query_layer = self.query(hidden_states)
-        mixed_key_layer = nn.functional.linear(hidden_states, self.key.weight)
-        mixed_value_layer = self.value(hidden_states)
-
-        query_layer = self.transpose_for_scores(mixed_query_layer)
-        key_layer = self.transpose_for_scores(mixed_key_layer)
-        value_layer = self.transpose_for_scores(mixed_value_layer)
-
-        attention_scores = torch.matmul(
-            query_layer / math.sqrt(self.attention_head_size), key_layer.transpose(-1, -2))
-        if attention_mask is not None:
-            attention_scores = attention_scores + self.get_extended_attention_mask(attention_mask)
-        attention_probs = nn.Softmax(dim=-1)(attention_scores)
-        context_layer = torch.matmul(attention_probs, value_layer)
-        context_layer = context_layer.permute(0, 2, 1, 3).contiguous()
-        new_context_layer_shape = context_layer.size()[
-                                  :-2] + (self.all_head_size,)
-        context_layer = context_layer.view(*new_context_layer_shape)
-        if return_scores:
-            assert attention_probs.shape[1] == 1
-            attention_probs = torch.squeeze(attention_probs, dim=1)
-            assert len(attention_probs.shape) == 3
-            return context_layer, attention_probs
-        return context_layer            
-            
-class CrossAttention(GlobalGraph):
-    def __init__(self, hidden_size, attention_head_size=None, num_attention_heads=1, key_hidden_size=None,
-                 query_hidden_size=None):
-        super(CrossAttention, self).__init__(hidden_size, attention_head_size, num_attention_heads)
-        if query_hidden_size is not None:
-            self.query = nn.Linear(query_hidden_size, self.all_head_size * self.num_qkv)
-        if key_hidden_size is not None:
-            self.key = nn.Linear(key_hidden_size, self.all_head_size * self.num_qkv)
-            self.value = nn.Linear(key_hidden_size, self.all_head_size * self.num_qkv)
-
-    def forward(self, hidden_states_query, hidden_states_key=None, attention_mask=None, mapping=None,
-                return_scores=False):
-        mixed_query_layer = self.query(hidden_states_query)
-        mixed_key_layer = self.key(hidden_states_key)
-        mixed_value_layer = self.value(hidden_states_key)
-
-        query_layer = self.transpose_for_scores(mixed_query_layer)
-        key_layer = self.transpose_for_scores(mixed_key_layer)
-        value_layer = self.transpose_for_scores(mixed_value_layer)
-
-        attention_scores = torch.matmul(
-            query_layer / math.sqrt(self.attention_head_size), key_layer.transpose(-1, -2))
-        if attention_mask is not None:
-            assert hidden_states_query.shape[1] == attention_mask.shape[1] \
-                   and hidden_states_key.shape[1] == attention_mask.shape[2]
-            attention_scores = attention_scores + self.get_extended_attention_mask(attention_mask)
-        attention_probs = nn.Softmax(dim=-1)(attention_scores)
-        context_layer = torch.matmul(attention_probs, value_layer)
-        context_layer = context_layer.permute(0, 2, 1, 3).contiguous()
-        new_context_layer_shape = context_layer.size()[
-                                  :-2] + (self.all_head_size,)
-        context_layer = context_layer.view(*new_context_layer_shape)
-        if return_scores:
-            return context_layer, torch.squeeze(attention_probs, dim=1)
-        return context_layer
 
 
 class LayerNorm(nn.Module):
@@ -203,11 +81,11 @@ class MLP(nn.Module):
         return hidden_states
         
 
-class sequenceModel_X(nn.Module):
+class Temperal_Encoder(nn.Module):
     """Construct the sequence model"""
 
     def __init__(self,args):
-        super(sequenceModel_X, self).__init__()
+        super(Temperal_Encoder, self).__init__()
         self.args = args
         self.hidden_size = self.args.hidden_size
         if args.input_mix:
@@ -239,9 +117,9 @@ class sequenceModel_X(nn.Module):
 
 
 
-class GCN(nn.Module):
+class Global_interaction(nn.Module):
     def __init__(self,args):
-        super(GCN, self).__init__()
+        super(Global_interaction, self).__init__()
         self.args = args
         self.hidden_size = self.args.hidden_size
         # Motion gate
@@ -301,10 +179,10 @@ class GCN(nn.Module):
 
 
 
-class MDNDecoder(nn.Module):
+class Laplacian_Decoder(nn.Module):
 
     def __init__(self,args):
-        super(MDNDecoder, self).__init__()
+        super(Laplacian_Decoder, self).__init__()
         self.args = args
         if args.mlp_decoder:
             self._decoder = MLPDecoder(args)

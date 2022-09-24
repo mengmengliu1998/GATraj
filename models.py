@@ -93,13 +93,13 @@ class GATraj(nn.Module):
     def __init__(self, args):
         super(GATraj, self).__init__()
         self.args = args
-        self.sequenceModel_X=sequenceModel_X(self.args)
-        self.MDNDecoder=MDNDecoder(self.args)
+        self.Temperal_Encoder=Temperal_Encoder(self.args)
+        self.Laplacian_Decoder=Laplacian_Decoder(self.args)
         if self.args.SR:
             message_passing = []
             for i in range(self.args.pass_time):
-                message_passing.append(GCN(args))
-            self.gcn = nn.ModuleList(message_passing)
+                message_passing.append(Global_interaction(args))
+            self.Global_interaction = nn.ModuleList(message_passing)
         if self.args.ifGaussian:
             self.reg_loss = GaussianNLLLoss(reduction='mean')
         else:
@@ -123,7 +123,7 @@ class GATraj(nn.Module):
         train_x = train_x.permute(1, 2, 0) #[N, 2, H]
         train_y = batch_norm_gt[self.args.obs_length:, :, :].permute(1, 2, 0) #[N, 2, H]
         self.pre_obs=batch_norm_gt[1:self.args.obs_length]
-        self.x_encoded_dense, self.hidden_state_unsplited, cn=self.sequenceModel_X.forward(train_x)  #[N, D], [N, D]
+        self.x_encoded_dense, self.hidden_state_unsplited, cn=self.Temperal_Encoder.forward(train_x)  #[N, D], [N, D]
         self.hidden_state_global = torch.ones_like(self.hidden_state_unsplited, device=device)
         cn_global = torch.ones_like(cn, device=device)
         if self.args.SR:
@@ -137,7 +137,7 @@ class GATraj(nn.Module):
                     nei_num = nei_num_batch[left:right, self.args.obs_length-1] #[N]
                     nei_index = torch.tensor(nei_list_batch[b][self.args.obs_length-1], device=device) #[N, N]
                     for i in range(self.args.pass_time):
-                        element_states, cn_state = self.gcn[i](corr_index, nei_index, nei_num, element_states, cn_state)
+                        element_states, cn_state = self.Global_interaction[i](corr_index, nei_index, nei_num, element_states, cn_state)
                     self.hidden_state_global[left: right] = element_states
                     cn_global[left: right] = cn_state
                 else:
@@ -146,7 +146,7 @@ class GATraj(nn.Module):
         else:
             self.hidden_state_global = self.hidden_state_unsplited
             cn_global = cn
-        mdn_out=self.MDNDecoder.forward(self.x_encoded_dense, self.hidden_state_global, cn_global, epoch)
+        mdn_out=self.Laplacian_Decoder.forward(self.x_encoded_dense, self.hidden_state_global, cn_global, epoch)
         GATraj_loss,full_pre_tra=self.mdn_loss(train_y.permute(2, 0, 1), mdn_out, 1, iftest)  #[K, H, N, 2]
         return GATraj_loss,full_pre_tra
 
