@@ -67,7 +67,6 @@ class DataLoader_bytrajec2():
             self.test_frameped_dict, self.test_pedtraject_dict = self.load_dict(self.test_data_file)
             self.dataPreprocess('test')
             print("self.num_tra", self.num_tra)
-
         self.trainbatch, self.trainbatchnums, \
         self.valbatch, self.valbatchnums=self.load_cache(self.train_batch_cache)
         self.testbatch, self.testbatchnums, _, _ = self.load_cache(self.test_batch_cache)
@@ -103,7 +102,6 @@ class DataLoader_bytrajec2():
             # Load the data from the csv file
             data = np.genfromtxt(file_path, delimiter=',')
             # Frame IDs of the frames in the current dataset
-
             Pedlist = np.unique(data[1, :]).tolist()
             numPeds = len(Pedlist)
             # Add the list of frameIDs to the frameList_data
@@ -130,7 +128,6 @@ class DataLoader_bytrajec2():
                 # Initialize the row of the numpy array
                 Trajectories = []
                 # For each ped in the current frame
-
                 for fi,frame in enumerate(FrameList):
                     # Extract their x and y positions
                     current_x = FrameContainPed[3, FrameContainPed[0, :] == frame][0]
@@ -355,10 +352,8 @@ class DataLoader_bytrajec2():
         num_Peds=0
         for batch in batch_data:
             num_Peds+=batch.shape[1]
-
         seq_list_b=np.zeros((self.args.seq_length,0))
         nodes_batch_b=np.zeros((self.args.seq_length,0,self.args.input_size))
-
         nei_list_b=np.zeros((self.args.seq_length,num_Peds,num_Peds))
         nei_num_b=np.zeros((self.args.seq_length,num_Peds))
         num_Ped_h=0
@@ -400,7 +395,6 @@ class DataLoader_bytrajec2():
         for pedi in range(num_Peds):
             seq = inputnodes[:, pedi]
             seq_list[seq[:, 0] != 0, pedi] = 1
-
         # get relative cords, neighbor id list
         nei_list = np.zeros((inputnodes.shape[0], num_Peds, num_Peds))
         nei_num = np.zeros((inputnodes.shape[0], num_Peds))
@@ -413,15 +407,11 @@ class DataLoader_bytrajec2():
             for pedj in range(num_Peds):
                 seqj = inputnodes[:, pedj]
                 select = (seq_list[:, pedi] > 0) & (seq_list[:, pedj] > 0)
-
                 relative_cord = seqi[select, :2] - seqj[select, :2]
-
                 # invalid data index
                 select_dist = (abs(relative_cord[:, 0]) > self.args.neighbor_thred) | (
                 abs(relative_cord[:, 1]) > self.args.neighbor_thred)
-
                 nei_num[select, pedi] -= select_dist
-
                 select[select == True] = select_dist
                 nei_list[select, pedi, pedj] = 0
         return seq_list, nei_list, nei_num
