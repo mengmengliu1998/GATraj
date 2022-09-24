@@ -14,9 +14,9 @@ The Default settings are to train on ETH-univ. Data cache and models will be in 
 ```
 git clone https://github.com/mengmengliu1998/GATraj.git
 cd GATraj
-python train.py --test_set <dataset to evaluate>  --num_epochs 1000 --x_encoder_layers 3 --eta_min 1e-5  --batch_size 32\
-  --learning_rate 5e-4 --ensemble_size 1 --randomRotate True --final_mode 5 --neighbor_thred 100\
-  --using_cuda True --clip 1 --pass_time 1 --ifGaussian False --SR True --input_position False --input_offset True  
+python train.py --test_set <dataset to train> --num_epochs 1000 --x_encoder_layers 3 --eta_min 1e-5  --batch_size 32\
+  --learning_rate 5e-4  --randomRotate True --final_mode 20 --neighbor_thred 10\
+  --using_cuda True --clip 1 --pass_time 2 --ifGaussian False --SR True --input_offset True 
 ```
 
 Configuration files are also created after the first run, arguments could be modified through configuration files or command line. 
@@ -30,16 +30,16 @@ The datasets are selected on arguments '--test_set'. Five datasets in ETH/UCY ar
 This command is to train model for ETH-hotel
 ```
 python train.py --test_set 0 --num_epochs 1000 --x_encoder_layers 3 --eta_min 1e-5  --batch_size 32\
-  --learning_rate 5e-4 --ensemble_size 1 --randomRotate True --final_mode 5 --neighbor_thred 100\
-  --using_cuda True --clip 1 --pass_time 1 --ifGaussian False --SR False --input_position False --input_offset True 
+  --learning_rate 5e-4  --randomRotate True --final_mode 20 --neighbor_thred 10\
+  --using_cuda True --clip 1 --pass_time 2 --ifGaussian False --SR True --input_offset True
 ```
 
 ## Test
 This command is to test model for ETH-hotel, just add --phase test --load_model 1000 to the end of this training command.
 ```
 python train.py --test_set 0 --num_epochs 1000 --x_encoder_layers 3 --eta_min 1e-5  --batch_size 32\
-  --learning_rate 5e-4 --ensemble_size 1 --randomRotate True --final_mode 5 --neighbor_thred 100\
-  --using_cuda True --clip 1 --pass_time 1 --ifGaussian False --SR False --input_position False --input_offset True --phase test  --load_model 1000
+  --learning_rate 5e-4  --randomRotate True --final_mode 20 --neighbor_thred 10\
+  --using_cuda True --clip 1 --pass_time 2 --ifGaussian False --SR True --input_offset True --phase test  --load_model 1000
 ```
 
 ### Cite GATraj
