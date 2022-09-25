@@ -409,8 +409,7 @@ class DataLoader_bytrajec2():
                 select = (seq_list[:, pedi] > 0) & (seq_list[:, pedj] > 0)
                 relative_cord = seqi[select, :2] - seqj[select, :2]
                 # invalid data index
-                select_dist = (abs(relative_cord[:, 0]) > self.args.neighbor_thred) | (
-                abs(relative_cord[:, 1]) > self.args.neighbor_thred)
+                select_dist = (abs(relative_cord[:, 0]) > self.args.neighbor_thred) | (abs(relative_cord[:, 1]) > self.args.neighbor_thred)
                 nei_num[select, pedi] -= select_dist
                 select[select == True] = select_dist
                 nei_list[select, pedi, pedj] = 0
@@ -461,15 +460,15 @@ def getLossMask(outputs,node_first, seq_list,using_cuda=False):
     Note: It is not supposed to calculate loss for a person at time t if his data at t-1 does not exsist.
     '''
     seq_length = outputs.shape[0]
-    node_pre=node_first
-    lossmask=torch.zeros(seq_length,seq_list.shape[1])
+    node_pre = node_first
+    lossmask = torch.zeros(seq_length,seq_list.shape[1])
     if using_cuda:
-        lossmask=lossmask.cuda()
+        lossmask = lossmask.cuda()
     for framenum in range(seq_length):
-        lossmask[framenum]=seq_list[framenum]*node_pre
+        lossmask[framenum] = seq_list[framenum]*node_pre
         if framenum>0:
-            node_pre=seq_list[framenum-1]
-    return lossmask,sum(sum(lossmask))
+            node_pre = seq_list[framenum-1]
+    return lossmask, sum(sum(lossmask))
 
 def L2forTest(outputs,targets,obs_length):
     '''
@@ -477,16 +476,16 @@ def L2forTest(outputs,targets,obs_length):
     information: [N, 3]
     '''
     seq_length = outputs.shape[0]
-    error=torch.norm(outputs-targets,p=2,dim=2)
-    error_pred_length=error[obs_length-1:]
-    error=torch.sum(error_pred_length)
-    error_cnt=error_pred_length.numel()
+    error = torch.norm(outputs-targets,p=2,dim=2)
+    error_pred_length = error[obs_length-1:]
+    error = torch.sum(error_pred_length)
+    error_cnt = error_pred_length.numel()
     if error == 0:
         return 0,0,0,0,0,0
-    final_error=torch.sum(error_pred_length[-1])
-    final_error_cnt=error_pred_length[-1].numel()
-    first_erro=torch.sum(error_pred_length[0])
-    first_erro_cnt=error_pred_length[0].numel()
+    final_error = torch.sum(error_pred_length[-1])
+    final_error_cnt = error_pred_length[-1].numel()
+    first_erro = torch.sum(error_pred_length[0])
+    first_erro_cnt = error_pred_length[0].numel()
     return error.item(),error_cnt,final_error.item(),final_error_cnt,first_erro.item(),first_erro_cnt
 
     

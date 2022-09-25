@@ -146,9 +146,9 @@ class GATraj(nn.Module):
         else:
             self.hidden_state_global = self.hidden_state_unsplited
             cn_global = cn
-        mdn_out=self.Laplacian_Decoder.forward(self.x_encoded_dense, self.hidden_state_global, cn_global, epoch)
-        GATraj_loss,full_pre_tra=self.mdn_loss(train_y.permute(2, 0, 1), mdn_out, 1, iftest)  #[K, H, N, 2]
-        return GATraj_loss,full_pre_tra
+        mdn_out = self.Laplacian_Decoder.forward(self.x_encoded_dense, self.hidden_state_global, cn_global, epoch)
+        GATraj_loss, full_pre_tra = self.mdn_loss(train_y.permute(2, 0, 1), mdn_out, 1, iftest)  #[K, H, N, 2]
+        return GATraj_loss, full_pre_tra
 
     def mdn_loss(self, y, y_prime, goal_gt, iftest):
         batch_size=y.shape[1]
