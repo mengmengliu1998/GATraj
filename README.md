@@ -23,7 +23,7 @@ Configuration files are also created after the first run, arguments could be mod
 Priority: command line \> configuration files \> default values in script.
 
 
-The datasets are selected on arguments '--test_set'. Five datasets in ETH/UCY are corresponding to the value of \[0,1,2,3,4\]. 
+The datasets are selected on arguments '--test_set'. Five datasets in ETH/UCY are corresponding to the value of \[0,1,2,3,4\] ([**eth, hotel, zara1, zara2, univ**]). 
 
 ### Example
 
