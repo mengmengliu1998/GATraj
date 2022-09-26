@@ -35,6 +35,7 @@ python train.py --test_set 0 --num_epochs 1000 --x_encoder_layers 3 --eta_min 1e
 ```
 
 ## Test
+We provide the trained model weights in the subdirectory "./savedata/0/".
 This command is to test model for ETH-univ, just add --phase test --load_model 1000 to the end of this training command.
 ```
 python train.py --test_set 0 --num_epochs 1000 --x_encoder_layers 3 --eta_min 1e-5  --batch_size 32\
