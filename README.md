@@ -57,4 +57,4 @@ If you find this repo useful, please consider citing our paper
 
 ### Reference
 
-The code base heavily borrows from [SR-LSTM](https://github.com/zhangpur/SR-LSTM)
+The code base heavily borrows from [SR-LSTM](https://github.com/zhangpur/SR-LSTM). The visulization code base for nuScenes is adopted from [PGP](https://github.com/nachiket92/PGP).
