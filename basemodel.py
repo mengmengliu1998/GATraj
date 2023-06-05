@@ -132,7 +132,7 @@ class Global_interaction(nn.Module):
 
     def forward(self, corr_index, nei_index, nei_num, hidden_state, cn):
         '''
-        States Refinement process modified from 'https://github.com/zhangpur/SR-LSTM' by Pu Zhang
+        States Refinement process
         Params:
             corr_index: relative coords of each pedestrian pair [N, N, D]
             nei_index: neighbor exsists flag [N, N]

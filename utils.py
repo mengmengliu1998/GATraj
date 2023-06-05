@@ -1,6 +1,5 @@
 '''
 Utils script
-This script is modified from 'https://github.com/zhangpur/SR-LSTM' by Pu Zhang
 Author: Mengmeng Liu
 Date: 2022/09/24
 '''
