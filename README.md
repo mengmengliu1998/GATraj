@@ -1,5 +1,5 @@
 # GATraj: A Graph- and Attention-based Multi-Agent Trajectory Prediction Model
-Code for ["GATraj: A Graph- and Attention-based Multi-Agent Trajectory Prediction Model"][https://www.sciencedirect.com/science/article/pii/S092427162300268X]
+Code for ["GATraj: A Graph- and Attention-based Multi-Agent Trajectory Prediction Model"](https://www.sciencedirect.com/science/article/pii/S092427162300268X)
 
 ![](imgs/introduction.gif)
 
