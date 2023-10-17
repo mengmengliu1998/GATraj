@@ -1,5 +1,5 @@
 # GATraj: A Graph- and Attention-based Multi-Agent Trajectory Prediction Model
-Code for ["GATraj: A Graph- and Attention-based Multi-Agent Trajectory Prediction Model"](https://arxiv.org/abs/2209.07857)
+Code for ["GATraj: A Graph- and Attention-based Multi-Agent Trajectory Prediction Model"]([https://arxiv.org/abs/2209.07857](https://www.sciencedirect.com/science/article/pii/S092427162300268X))
 
 ![](imgs/introduction.gif)
 
@@ -47,11 +47,14 @@ python train.py --test_set 0 --num_epochs 1000 --x_encoder_layers 3 --eta_min 1e
 
 If you find this repo useful, please consider citing our paper
 ```bibtex
-@article{cheng2022gatraj,
-  title={GATraj: A Graph-and Attention-based Multi-Agent Trajectory Prediction Model},
+@article{cheng2023gatraj,
+  title={Gatraj: A graph-and attention-based multi-agent trajectory prediction model},
   author={Cheng, Hao and Liu, Mengmeng and Chen, Lin and Broszio, Hellward and Sester, Monika and Yang, Michael Ying},
-  journal={arXiv preprint arXiv:2209.07857},
-  year={2022}
+  journal={ISPRS Journal of Photogrammetry and Remote Sensing},
+  volume={205},
+  pages={163--175},
+  year={2023},
+  publisher={Elsevier}
 }
 ```
 
